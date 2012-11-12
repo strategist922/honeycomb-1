@@ -1,13 +1,30 @@
-*.class
-*.log
-
-# sbt specific
-dist/*
-target/
+# SBT
+boot/
 lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
+target/
+.history
 
-# Scala-IDE specific
+# Eclipse
+.cache
+.classpath
+.project
 .scala_dependencies
+.settings
+.target/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# TextMate
+*.tmproj
+
+# Mac
+.DS_Store
+
+# SVN
+.svn
+
