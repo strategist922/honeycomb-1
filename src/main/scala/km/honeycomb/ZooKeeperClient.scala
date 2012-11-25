@@ -7,16 +7,9 @@ class ZooKeeperClient extends Actor with ActorLogging {
   
   import ZooKeeperClient._
   
-  val isLeader =
-    if (context.system.settings.config.hasPath("leader"))
-      context.system.settings.config.getBoolean("leader")
-    else
-      false
-  
   def receive = {
     case WhoIsLeader =>
-      if (isLeader) sender ! self.path.root.address
-      else sender ! "null"
+      sender ! LeaderIs("akka://honeycomb@127.0.0.1:2552/user/controller")
     case LeaderIs(who) =>
     case x => log.warning("Unknown message: {}", x.toString)
   }
