@@ -24,14 +24,14 @@ class HashService extends Actor with ActorLogging {
     case x => log.warning("Unknown message: {}", x.toString)
   }
 
-  private def hashFunction() = {
+  private def hashFunction(): BigInt = {
     var x = new Array[Byte](random.nextInt())
     random.nextBytes(x)
     val ret = BigInt(enc.digest(x))
     enc.reset
     ret
   }
-  private def hashFunction(x: Array[Byte]) = {
+  private def hashFunction(x: Array[Byte]): BigInt = {
     val ret = BigInt(enc.digest(x))
     enc.reset
     ret

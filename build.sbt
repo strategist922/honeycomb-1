@@ -1,5 +1,7 @@
 import AssemblyKeys._
 
+scalaVersion := "2.9.2"
+
 name := "honeycomb"
 
 version := "0.1.0-SNAPSHOT"

@@ -12,8 +12,11 @@ class ControlService extends Actor with ActorLogging {
 
   val zkClient = context.actorOf(Props[ZooKeeperClient], "zookeeperClient")
   context.actorOf(Props[HashService], "hashService")
-  context.actorOf(Props[MembershipService], "membershipService")
-  var membershipService: Option[ActorRef] = None
+  val membershipService = context.actorOf(
+    Props[MembershipService],
+    "membershipService"
+  )
+  //var membershipService: Option[ActorRef] = None
 
   val config = context.system.settings.config
 
@@ -31,17 +34,22 @@ class ControlService extends Actor with ActorLogging {
 
   def receive = {
     case LeaderIs(who) =>
+      // save some information about leader
       leaderURI = Some(who)
       leader = Some(context.actorFor(who))
-      membershipService = Some(leaderFor("/membershipService"))
-      membershipService.get ! Join(addr)
-    case m @ Join(who) =>
-      val ref = leaderFor("/leaderService")
-      log.info("{}", ref.toString())
-    //leaderService forward m
+
+      // notify my membershipService who is leader
+      membershipService ! SetLeader(who, self == leader.get)
+      //membershipService = Some(leaderFor("/membershipService"))
+      //membershipService.get ! Join(addr, isLeader(self))
+
+    case JoinAck(code) =>
+      code
     case x => log.warning("Unknown message: {}", x.toString)
   }
 
   private def leaderFor(name: String) = context.actorFor(leaderURI.get + name)
+
+  private def isLeader(ref: ActorRef) = ref == leader.get
 
 }
