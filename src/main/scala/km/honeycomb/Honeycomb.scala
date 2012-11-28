@@ -5,7 +5,7 @@ import com.typesafe.config._
 
 object Honeycomb {
 
-  import ZooKeeperClient._
+  //import ZooKeeperClient._
 
   val system = ActorSystem(
     "honeycomb",
@@ -14,7 +14,7 @@ object Honeycomb {
 
   val control = system.actorOf(Props[ControlService], "controller")
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
     //zkClient tell (WhoIsLeader, control)
     new RESTService(8080)
   }

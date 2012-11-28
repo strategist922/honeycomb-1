@@ -4,9 +4,17 @@ import akka.actor._
 
 trait ActorHelper extends Actor {
   val config = context.system.settings.config
-  val myname = self.path.name
-  val myaddr = self.path.address.toString
   val myhost = config.getString("akka.remote.netty.hostname")
   val myport = config.getInt("akka.remote.netty.port")
-  val mypath = myaddr + "@" + myhost + ":" + myport + "/user/" + myname
+  
+  val mypath = toFullPath(self)
+  val localControllerPath = toFullPath(context.system.actorFor("user/controller"))
+  
+  def toFullPath(actor: ActorRef): String = {
+    val addr = actor.path.address
+    val addrString = addr.toString
+    val pathString = actor.path.toStringWithAddress(addr)
+    val suffix = pathString diff addrString
+    addrString + "@" + myhost + ":" + myport + suffix
+  }
 }

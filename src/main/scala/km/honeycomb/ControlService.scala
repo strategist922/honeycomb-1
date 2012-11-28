@@ -42,7 +42,7 @@ class ControlService extends Actor with ActorLogging {
       // save some information about leader
       leaderURI = Some(who)
       leader = Some(context.actorFor(who))
-
+      
       // notify my membershipService who is leader
       membershipService ! SetLeader(who, self == leader.get)
       

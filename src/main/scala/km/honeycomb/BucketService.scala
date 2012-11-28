@@ -25,7 +25,7 @@ class BucketService extends Actor with ActorLogging with ActorHelper {
         n <- ask(membershipService, FindNode(c.c), Timeout(1 second)).mapTo[NodeForCode]
       } yield n
       fut onSuccess { case NodeForCode(code, path) =>
-        val ref = context.actorFor(path + "/buckerService")
+        val ref = context.actorFor(path + "/bucketService")
         ref ! Store(code, value)
       }
       

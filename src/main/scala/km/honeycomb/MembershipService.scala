@@ -7,37 +7,34 @@ import akka.pattern.Patterns._
 import akka.util.Timeout
 import akka.util.duration._
 
-class MembershipService extends Actor with ActorLogging {
+class MembershipService extends Actor with ActorLogging with ActorHelper {
 
   import MembershipService._
   import HashService._
 
   val hashService = context.actorFor("../hashService")
 
+  // code -> path (remote controller)
   var members: SortedMap[BigInt, String] = SortedMap.empty
 
   var myCode: Option[BigInt] = None
 
   var leaderMembershipService: Option[ActorRef] = None
 
-  val config = context.system.settings.config
-
-  val myname = self.path.name
-  val myaddr = self.path.address.toString
-  val myhost = config.getString("akka.remote.netty.hostname")
-  val myport = config.getInt("akka.remote.netty.port")
-  val mypath = myaddr + "@" + myhost + ":" + myport + "/user/" + myname
-
   def receive = {
-    case SetLeader(path, myself) =>
+    case SetLeader(leaderPath, myself) =>
       log.info("My path: {}", mypath)
-      log.info("Leader's path: {}", path)
-      leaderMembershipService = Some(context.actorFor(path + "/membershipService"))
-      ask(hashService, Hash(mypath), Timeout(1 second))
+      log.info("My local controller: {}", localControllerPath)
+      log.info("Leader's path: {}", leaderPath)
+      leaderMembershipService = Some(context.actorFor(leaderPath + "/membershipService"))
+      
+      // get hash code for local controller path
+      ask(hashService, Hash(localControllerPath), Timeout(1 second))
         .mapTo[Code]
         .onSuccess { case Code(code) =>
-          myCode = Some(code)
-          leaderMembershipService.get ! Join(mypath, code)
+          myCode = Some(code) // set hash code
+          // send (local controller path, code) to leader membership service
+          leaderMembershipService.get ! Join(localControllerPath, code)
         }
 
     case Join(who, code) =>
@@ -68,7 +65,7 @@ class MembershipService extends Actor with ActorLogging {
 }
 
 object MembershipService {
-  case class SetLeader(path: String, myself: Boolean = false)
+  case class SetLeader(leaderPath: String, myself: Boolean = false)
   case class Join(who: String, code: BigInt)
   case class Leave(who: String)
   case class FindNode(code: BigInt)

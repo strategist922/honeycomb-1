@@ -18,10 +18,11 @@ class RESTService(port: Int) {
     import BucketService._
     
     val system = Honeycomb.system
-    val bucketService = system.actorFor("controller/bucketService")
+    val bucketService = system.actorFor("user/controller/bucketService")
     
     def intent() = {
       case r @ GET(Path(Seg(key :: Nil))) =>
+        println("get(" + key + ")")
         ask(bucketService, Get(key), Timeout(1 second))
         .mapTo[Option[String]]
         .onComplete {
@@ -33,6 +34,7 @@ class RESTService(port: Int) {
       case r @ POST(Path(Seg(key :: Nil))) & QueryParams(params) =>
         params.get("value") match {
           case Some(Seq(value)) =>
+            println("put(" + key + ", " + value + ")")
             bucketService ! Put(key, value)
             r.respond(ResponseString("ok"))
           case _ =>
