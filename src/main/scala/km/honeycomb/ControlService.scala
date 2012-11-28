@@ -46,18 +46,18 @@ class ControlService extends Actor with ActorLogging {
       // notify my membershipService who is leader
       membershipService ! SetLeader(who, self == leader.get)
       
-    case Get(key) =>
-      val theSender = sender
-      ask(bucketService, Load(key), Timeout(1 second))
-      .mapTo[Option[String]]
-      .onSuccess { case x => theSender ! x }
-      
-    case Put(key, value) =>
-      for {
-        c <- ask(hashService, Hash(key), Timeout(1 second)).mapTo[Code]
-        
-      }
-      bucketService ! Store(key, value)
+//    case Get(key) =>
+//      val theSender = sender
+//      ask(bucketService, Load(key), Timeout(1 second))
+//      .mapTo[Option[String]]
+//      .onSuccess { case x => theSender ! x }
+//      
+//    case Put(key, value) =>
+//      for {
+//        c <- ask(hashService, Hash(key), Timeout(1 second)).mapTo[Code]
+//        
+//      }
+//      bucketService ! Store(key, value)
 
     case x => log.warning("Unknown message: {}", x.toString)
   }
