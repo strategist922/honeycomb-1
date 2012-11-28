@@ -1,10 +1,7 @@
 package km.honeycomb
 
 import akka.actor._
-import com.typesafe.play.mini._
-import play.api.mvc._
-import play.api.mvc.Results._
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config._
 
 object Honeycomb {
 
@@ -19,6 +16,8 @@ object Honeycomb {
 
   def main(args: Array[String]) = {
     //zkClient tell (WhoIsLeader, control)
+    new RESTService(8080)
   }
 
 }
+
