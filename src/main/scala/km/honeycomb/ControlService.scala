@@ -25,13 +25,11 @@ class ControlService extends Actor with ActorHelper with ActorLogging {
     "membershipService"
   )
   val bucketService = context.actorOf(Props[BucketService], "bucketService")
-
-  //  val config = context.system.settings.config
-  //  val myname = self.path.name
-  //  val myaddr = self.path.address.toString
-  //  val myhost = config.getString("akka.remote.netty.hostname")
-  //  val myport = config.getInt("akka.remote.netty.port")
-  //  val mypath = myaddr + "@" + myhost + ":" + myport + "/user/" + myname
+  
+  context.watch(zkClient)
+  context.watch(hashService)
+  context.watch(membershipService)
+  context.watch(bucketService)
 
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
@@ -64,14 +62,8 @@ class ControlService extends Actor with ActorHelper with ActorLogging {
     case x => log.warning("Unknown message: {}", x.toString)
   }
 
-  private def leaderFor(name: String) = context.actorFor(leaderPath.get + name)
-
-  private def isLeader(ref: ActorRef) = ref == leader.get
-
 }
 
 object ControlService {
-  case class Get(key: String)
-  case class Put(key: String, value: String)
   class LeaderNotFoundException(msg: String) extends RuntimeException(msg)
 }

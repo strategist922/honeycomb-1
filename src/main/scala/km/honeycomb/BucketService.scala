@@ -23,6 +23,7 @@ class BucketService extends Actor with ActorHelper with ActorLogging {
 
   def receive = {
     case Put(key, value) =>
+      log.info("Put({}, {})", key, value)
       val theSender = sender
       val fut = findNodeFuture(key)
       fut onSuccess {
@@ -56,7 +57,12 @@ class BucketService extends Actor with ActorHelper with ActorLogging {
       log.info("Bucket Migration: destination :: {} - code :: {}",
         fullPath, code.toString)
       val actor = context.actorFor(fullPath + "/bucketService")
-      bucket.filter(_._1 > code).foreach(x => actor ! Store(x._1, x._2))
+      var cnt = 0
+      bucket.filter(_._1 >= code) foreach { case (c, v) =>
+        actor ! Store(c, v)
+        cnt += 1
+      }
+      log.info("{} elements moved", cnt)
 
     case x => log.warning("Unknown message: {}", x.toString)
   }

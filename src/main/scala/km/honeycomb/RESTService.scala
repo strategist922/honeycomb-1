@@ -19,23 +19,27 @@ class RESTService(port: Int) {
     import BucketService._
 
     val system = Honeycomb.system
-    val bucketService = system.actorFor("user/controller/bucketService")
+    val config = system.settings.config
+    val myhost = config.getString("akka.remote.netty.hostname")
+    val myport = config.getInt("akka.remote.netty.port")
+    val bucketService = 
+      system.actorFor("akka://honeycomb@" + myhost + ":" + myport + "/user/controller/bucketService")
 
     def intent() = {
       case r @ GET(Path(Seg(key :: Nil))) =>
-        println("get(" + key + ")")
+        //println("get(" + key + ")")
         ask(bucketService, Get(key), Timeout(1 second))
           .mapTo[Option[String]]
           .onComplete {
             case Right(Some(value)) => r.respond(ResponseString(value))
-            case Right(None) => r.respond(BadRequest)
+            case Right(None) => r.respond(NotFound)
             case Left(e) => r.respond(BadRequest)
           }
 
       case r @ POST(Path(Seg(key :: Nil))) & QueryParams(params) =>
         params.get("value") match {
           case Some(Seq(value)) =>
-            println("put(" + key + ", " + value + ")")
+            //println("put(" + key + ", " + value + ")")
             bucketService ! Put(key, value)
             r.respond(ResponseString("ok"))
           case _ =>
