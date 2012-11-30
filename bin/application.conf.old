@@ -1,0 +1,8 @@
+node {
+    akka {
+        remote.netty.hostname = "127.0.0.1"
+        remote.netty.port = 2550
+    }
+    leader.host = "127.0.0.1"
+    leader.port = 2550
+}

@@ -11,10 +11,12 @@ object Honeycomb {
     "honeycomb",
     ConfigFactory.load.getConfig("node")
   )
+  
+  system.actorOf(Props[ControlService], "controller")
 
   def main(args: Array[String]): Unit = {
     //zkClient tell (WhoIsLeader, control)
-    system.actorOf(Props[ControlService], "controller")
+    
     val rest = new RESTService(8080)
     rest.start()
     
