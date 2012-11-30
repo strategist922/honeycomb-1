@@ -40,6 +40,9 @@ class MembershipService extends Actor with ActorLogging with ActorHelper {
     case Join(who, code) =>
       log.info("Join node: {} :: {}", who, code.toString)
       addMember(code, who)
+      // Re-balance
+      
+      
       
     case Leave(who) =>
       log.info("Leave node: {}", who)
