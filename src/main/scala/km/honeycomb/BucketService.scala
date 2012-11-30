@@ -20,7 +20,7 @@ class BucketService extends Actor with ActorHelper with ActorLogging {
   val membershipService = context.actorFor("../membershipService")
 
   override def preStart() = log.info("{} started", myFullPath)
-  
+
   def receive = {
     case Put(key, value) =>
       val theSender = sender
@@ -44,11 +44,17 @@ class BucketService extends Actor with ActorHelper with ActorLogging {
       } yield v
       fut onSuccess { case x => theSender ! x }
 
-    case Store(code, value) => bucket += code -> value
+    case Store(code, value) =>
+      log.info("store :: bucket({}, {})", code, value)
+      bucket += code -> value
 
-    case Load(code) => sender ! bucket.get(code)
-    
+    case Load(code) =>
+      log.info("load :: bucket({}, {})", code)
+      sender ! bucket.get(code)
+
     case Migration(code, fullPath) =>
+      log.info("Bucket Migration: destination :: {} - code :: {}",
+        fullPath, code.toString)
       val actor = context.actorFor(fullPath + "/bucketService")
       bucket.filter(_._1 > code).foreach(x => actor ! Store(x._1, x._2))
 

@@ -37,18 +37,20 @@ class MembershipService extends Actor with ActorHelper with ActorLogging {
     // Only leader receives Join and Leave message
     case Join(code, actorFullPath) =>
       log.info("Join node: {} :: {}", actorFullPath, code.toString)
-      members map {
+      log.info("localControllerFullPath: {}", localControllerFullPath)
+      members foreach {
         case (code, path) if path != localControllerFullPath =>
           // TODO - cache remote actor reference for performance!
           val ref = context.actorFor(path + "/membershipService")
           log.info("Announce {}'s Join to {}", actorFullPath, path)
           ref ! JoinAnnounce(code, actorFullPath)
+        case _ => Unit
       }
 
       // Re-balance
       if (members.size > 0) {
         val fromPath = nodePathByCircularFloor(code)
-        val fromRef = context.actorFor(fromPath + "/membershipService")
+        val fromRef = context.actorFor(fromPath + "/bucketService")
         fromRef ! Migration(code, actorFullPath)
       }
 
