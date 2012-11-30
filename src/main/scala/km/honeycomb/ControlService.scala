@@ -6,7 +6,7 @@ import akka.pattern.Patterns._
 import akka.util.Timeout
 import akka.util.duration._
 
-class ControlService extends Actor with ActorLogging {
+class ControlService extends Actor with ActorHelper with ActorLogging {
 
   import ControlService._
   import ZooKeeperClient._
@@ -25,12 +25,12 @@ class ControlService extends Actor with ActorLogging {
   )
   val bucketService = context.actorOf(Props[BucketService], "bucketService")
 
-  val config = context.system.settings.config
-  val myname = self.path.name
-  val myaddr = self.path.address.toString
-  val myhost = config.getString("akka.remote.netty.hostname")
-  val myport = config.getInt("akka.remote.netty.port")
-  val mypath = myaddr + "@" + myhost + ":" + myport + "/user/" + myname
+//  val config = context.system.settings.config
+//  val myname = self.path.name
+//  val myaddr = self.path.address.toString
+//  val myhost = config.getString("akka.remote.netty.hostname")
+//  val myport = config.getInt("akka.remote.netty.port")
+//  val mypath = myaddr + "@" + myhost + ":" + myport + "/user/" + myname
 
   override def preStart() = {
     log.info("{} started", mypath)
@@ -45,19 +45,6 @@ class ControlService extends Actor with ActorLogging {
       
       // notify my membershipService who is leader
       membershipService ! SetLeader(who, self == leader.get)
-      
-//    case Get(key) =>
-//      val theSender = sender
-//      ask(bucketService, Load(key), Timeout(1 second))
-//      .mapTo[Option[String]]
-//      .onSuccess { case x => theSender ! x }
-//      
-//    case Put(key, value) =>
-//      for {
-//        c <- ask(hashService, Hash(key), Timeout(1 second)).mapTo[Code]
-//        
-//      }
-//      bucketService ! Store(key, value)
 
     case x => log.warning("Unknown message: {}", x.toString)
   }
